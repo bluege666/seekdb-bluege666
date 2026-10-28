@@ -11329,6 +11329,8 @@ relation_factor %prec LOWER_PARENS
 {
   malloc_non_terminal_node($$, result->malloc_pool_, T_TABLE_COLLECTION_EXPRESSION, 2, $3, $6);
 }
+/* OB-P:a4L9E_IDIyEM2Ol_ZvDXqw */
+/* file-as-database table function: read_csv / read_json / read_parquet / glob */
 | NAME_OB '(' read_file_arg_list ')' opt_as_alias
 {
   ParseNode *func_node = NULL;

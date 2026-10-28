@@ -2702,6 +2702,7 @@ int ObDMLResolver::resolve_table(const ParseNode &parse_tree,
         break;
       }
       case T_READ_FILE_FUNCTION: {
+        // OB-P:a4L9E_IDIyEM2Ol_ZvDXqw
         // file-as-database table function: read_csv / read_json / read_parquet / glob
         bool enable_file_sql = false;
         if (OB_ISNULL(session_info_)) {
