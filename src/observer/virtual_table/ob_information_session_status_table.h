@@ -39,7 +39,7 @@ class ObInfoSchemaSessionStatusTable : public common::ObVirtualTableScannerItera
     UPTIME
   };
 
-  typedef common::hash::ObHashMap<common::ObString, common::ObObj> AllStatus;
+  typedef common::hash::ObHashMap<common::ObString, common::DatumValue> AllStatus;
 
 public:
   ObInfoSchemaSessionStatusTable();

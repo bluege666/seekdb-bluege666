@@ -108,33 +108,33 @@ int ObAllVirtualRaidStat::inner_get_next_row(ObNewRow *&row)
       uint64_t col_id = output_column_ids_.at(i);
       switch (col_id) {
         case DISK_INDEX:
-          cur_row_.cells_[i].set_int(stat.disk_idx_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cur_row_.cells_, cur_row_.count_, i, stat.disk_idx_) : ret);
           break;
         case INSTALL_SEQ:
-          cur_row_.cells_[i].set_int(stat.install_seq_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cur_row_.cells_, cur_row_.count_, i, stat.install_seq_) : ret);
           break;
         case DATA_NUM:
-          cur_row_.cells_[i].set_int(disk_stats_.data_num_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cur_row_.cells_, cur_row_.count_, i, disk_stats_.data_num_) : ret);
           break;
         case PARITY_NUM:
-          cur_row_.cells_[i].set_int(disk_stats_.parity_num_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cur_row_.cells_, cur_row_.count_, i, disk_stats_.parity_num_) : ret);
           break;
         case CREATE_TS:
-          cur_row_.cells_[i].set_int(stat.create_ts_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cur_row_.cells_, cur_row_.count_, i, stat.create_ts_) : ret);
           break;
         case FINISH_TS:
-          cur_row_.cells_[i].set_int(stat.finish_ts_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cur_row_.cells_, cur_row_.count_, i, stat.finish_ts_) : ret);
           break;
         case ALIAS_NAME:
-          cur_row_.cells_[i].set_varchar(stat.alias_name_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cur_row_.cells_, cur_row_.count_, i, stat.alias_name_) : ret);
           cur_row_.cells_[i].set_collation_type(ObCharset::get_default_collation(ObCharset::get_default_charset()));
           break;
         case STATUS:
-          cur_row_.cells_[i].set_varchar(stat.status_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cur_row_.cells_, cur_row_.count_, i, stat.status_) : ret);
           cur_row_.cells_[i].set_collation_type(ObCharset::get_default_collation(ObCharset::get_default_charset()));
           break;
         case PERCENT:
-          cur_row_.cells_[i].set_int(stat.percent_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cur_row_.cells_, cur_row_.count_, i, stat.percent_) : ret);
           break;
         default:
           ret = OB_ERR_UNEXPECTED;

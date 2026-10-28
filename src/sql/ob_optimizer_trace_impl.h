@@ -29,7 +29,6 @@
 namespace oceanbase
 {
 namespace common {
-class ObObj;
 class ObDSResultItem;
 class ObTabletID;
 struct ObVersionRange;
@@ -330,7 +329,7 @@ public:
   int append(const uint64_t &value);
   int append(const uint32_t &value);
   int append(const double & value);
-  int append(const ObObj& value);
+  int append(const common::DatumValue &value);
   int append(const OpParallelRule& rule);
   int append(const ObTableLocationType& type);
   int append(const ObPhyPlanType& type);
@@ -395,6 +394,8 @@ public:
   int trace_time_used();
   int trace_mem_used();
 private:
+  template <typename Value>
+  int append_typed_value(const Value &value);
   common::ObArenaAllocator allocator_;
   LogFileAppender log_handle_;
   common::ObString sql_id_;
@@ -448,7 +449,7 @@ ObOptimizerTraceImpl::append(const T* value)
 {
   int ret = OB_SUCCESS;
   ObString sql;
-  ObObjPrintParams print_params;
+  ObValuePrintParams print_params;
   common::ObArenaAllocator allocator("OptimizerTrace");
   // TODO: @zhenling, use a valid schema guard in each query
   if (OB_FAIL(ObSQLUtils::reconstruct_sql(allocator,

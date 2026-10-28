@@ -58,7 +58,7 @@ int ObAllVirtualMemoryInfo::inner_get_next_row(ObNewRow *&row)
   int ret = OB_SUCCESS;
   if (!has_start_) {
     col_count_ = output_column_ids_.count();
-    ObObj *cells = cur_row_.cells_;
+    DatumValue *cells = cur_row_.cells_;
     if (OB_UNLIKELY(NULL == cells)) {
       ret = OB_ERR_UNEXPECTED;
       SERVER_LOG(ERROR, "cur row cell is NULL", K(ret));
@@ -71,11 +71,11 @@ int ObAllVirtualMemoryInfo::inner_get_next_row(ObNewRow *&row)
           const uint64_t col_id = output_column_ids_.at(i);
           switch (col_id) {
           case CTX_ID: {
-              cells[i].set_int(ctx_id);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, ctx_id) : ret);
               break;
             }
           case CTX_NAME: {
-              cells[i].set_varchar(get_global_ctx_info().get_ctx_name(ctx_id));
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, get_global_ctx_info().get_ctx_name(ctx_id)) : ret);
               cells[i].set_collation_type(
                   ObCharset::get_default_collation(ObCharset::get_default_charset()));
               break;
@@ -83,41 +83,41 @@ int ObAllVirtualMemoryInfo::inner_get_next_row(ObNewRow *&row)
           case MOD_TYPE: {
               ObString mod_type;
               mod_type = ObString::make_string("user");
-              cells[i].set_varchar(mod_type);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, mod_type) : ret);
               cells[i].set_collation_type(
                   ObCharset::get_default_collation(ObCharset::get_default_charset()));
               break;
             }
           case MOD_ID: {
               // MOD_ID deprecated, retained for tool compatibility
-              cells[i].set_int(0);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, 0) : ret);
               break;
             }
           case LABEL:
           case MOD_NAME: {
-              cells[i].set_varchar(mod_name);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, mod_name) : ret);
               cells[i].set_collation_type(
                   ObCharset::get_default_collation(ObCharset::get_default_charset()));
               break;
             }
           case HOLD: {
-              cells[i].set_int(hold);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, hold) : ret);
               break;
             }
           case USED: {
-              cells[i].set_int(used);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, used) : ret);
               break;
             }
           case COUNT: {
-              cells[i].set_int(count);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, count) : ret);
               break;
             }
           case ALLOC_COUNT: {
-              cells[i].set_int(0);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, 0) : ret);
               break;
             }
           case FREE_COUNT: {
-              cells[i].set_int(0);
+              (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, 0) : ret);
               break;
             }
           default: {

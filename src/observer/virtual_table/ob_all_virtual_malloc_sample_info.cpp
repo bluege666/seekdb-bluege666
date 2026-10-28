@@ -68,7 +68,7 @@ int ObMallocSampleInfo::inner_get_next_row(ObNewRow *&row)
 int ObMallocSampleInfo::fill_row(ObNewRow *&row)
 {
   int ret = OB_SUCCESS;
-  ObObj *cells = NULL;
+  DatumValue *cells = NULL;
   if (OB_ISNULL(cells = cur_row_.cells_)) {
     ret = OB_ERR_UNEXPECTED;
     SERVER_LOG(WARN, "cur row cell is NULL", K(ret));
@@ -77,34 +77,34 @@ int ObMallocSampleInfo::fill_row(ObNewRow *&row)
       const uint64_t col_id = output_column_ids_.at(i);
       switch (col_id) {
       case CTX_ID: {
-          cells[i].set_int(it_->first.ctx_id_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, it_->first.ctx_id_) : ret);
           break;
         }
       case MOD_NAME: {
-          cells[i].set_varchar(it_->first.label_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, it_->first.label_) : ret);
           cells[i].set_collation_type(
               ObCharset::get_default_collation(ObCharset::get_default_charset()));
           break;
         }
       case BACKTRACE: {
           IGNORE_RETURN parray(bt_, sizeof(bt_), (int64_t*)it_->first.bt_, AOBJECT_BACKTRACE_COUNT);
-          cells[i].set_varchar(bt_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, bt_) : ret);
           cells[i].set_collation_type(
               ObCharset::get_default_collation(ObCharset::get_default_charset()));
           break;
       }
       case CTX_NAME: {
-          cells[i].set_varchar(get_global_ctx_info().get_ctx_name(it_->first.ctx_id_));
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, get_global_ctx_info().get_ctx_name(it_->first.ctx_id_)) : ret);
           cells[i].set_collation_type(
               ObCharset::get_default_collation(ObCharset::get_default_charset()));
           break;
         }
       case ALLOC_COUNT: {
-          cells[i].set_int(it_->second.alloc_count_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, it_->second.alloc_count_) : ret);
           break;
         }
       case ALLOC_BYTES: {
-          cells[i].set_int(it_->second.alloc_bytes_);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, it_->second.alloc_bytes_) : ret);
           break;
         }
       default: {

@@ -35,7 +35,7 @@ int ObAllVirtualIOStat::inner_get_next_row(ObNewRow *&row)
   row = NULL;
   return OB_ITER_END;
 //  int ret = OB_SUCCESS;
-//  ObObj *cells = cur_row_.cells_;
+//  DatumValue *cells = cur_row_.cells_;
 //  if (!start_to_read_) {
 //    start_to_read_ = true;
 //  } else {
@@ -52,47 +52,47 @@ int ObAllVirtualIOStat::inner_get_next_row(ObNewRow *&row)
 //          ret = OB_BUF_NOT_ENOUGH;
 //          SERVER_LOG(WARN, "svr ip buffer is not enough", K(ret));
 //        } else {
-//          cells[i].set_varchar(svr_ip_);
+//          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, svr_ip_) : ret);
 //          cells[i].set_collation_type(ObCharset::get_default_collation(ObCharset::get_default_charset()));
 //        }
 //        break;
 //      }
 
-//        cells[i].set_int(OBSERVER.get_self().get_port());
+//        (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, OBSERVER.get_self().get_port()) : ret);
 //        break;
 //      }
 //      case DISK_TYPE: {
 //        if (OB_FAIL(ObIOBenchmark::get_instance().get_disk_type_str(disk_type_, OB_MAX_DISK_TYPE_LENGTH))) {
 //          SERVER_LOG(WARN, "failed to get disk type str", K(ret));
 //        } else {
-//          cells[i].set_varchar(disk_type_);
+//          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, disk_type_) : ret);
 //        }
 //        break;
 //      }
 //      case SYS_IO_UP_LIMIT_IN_MB: {
-//        cells[i].set_int(io_manager.get_sys_iops_up_limit() * MACRO_BLOCK_SIZE_IN_MB);
+//        (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, io_manager.get_sys_iops_up_limit() * MACRO_BLOCK_SIZE_IN_MB) : ret);
 //        break;
 //      }
 //      case SYS_IO_BAND_IN_MB: {
 //        const int64_t sys_iops = (io_manager.get_sys_iops_up_limit() * io_manager.get_sys_io_percent() / 100 + 1);
-//        cells[i].set_int(sys_iops * MACRO_BLOCK_SIZE_IN_MB);
+//        (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, sys_iops * MACRO_BLOCK_SIZE_IN_MB) : ret);
 //        break;
 //      }
 //      case SYS_IO_LOW_WATERMARK_IN_MB: {
 //        const int64_t sys_iops_low = io_manager.get_sys_io_low_percent(io_conf) * io_manager.get_sys_iops_up_limit() / 100 + 1;
-//        cells[i].set_int(sys_iops_low * MACRO_BLOCK_SIZE_IN_MB);
+//        (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, sys_iops_low * MACRO_BLOCK_SIZE_IN_MB) : ret);
 //        break;
 //      }
 //      case SYS_IO_HIGH_WATERMARK_IN_MB: {
 //        const int64_t sys_iops_high = io_conf.sys_io_high_percent_ * io_manager.get_sys_iops_up_limit() / 100 + 1;
-//        cells[i].set_int(sys_iops_high * MACRO_BLOCK_SIZE_IN_MB);
+//        (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, sys_iops_high * MACRO_BLOCK_SIZE_IN_MB) : ret);
 //        break;
 //      }
 //      case IO_BENCH_RESULT: {
 //        if (OB_FAIL(ObIOBenchmark::get_instance().get_io_bench_result_str(io_bench_result_, OB_MAX_IO_BENCH_RESULT_LENGTH))) {
 //          SERVER_LOG(WARN, "failed to get io bench result", K(ret));
 //        } else {
-//          cells[i].set_varchar(io_bench_result_);
+//          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, io_bench_result_) : ret);
 //        }
 //        break;
 //      }

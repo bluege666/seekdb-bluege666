@@ -281,7 +281,7 @@ bool is_left_associative(ObItemType op_type) {
   }
 }
 
-int ObReqExpr::translate_alias(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_)
+int ObReqExpr::translate_alias(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_)
 {
   int ret = OB_SUCCESS;
   if (!alias_name.empty()) {
@@ -291,7 +291,7 @@ int ObReqExpr::translate_alias(ObObjPrintParams &print_params_, char *buf_, int6
   return ret;
 }
 
-int ObReqExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqExpr::translate_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   PRINT_IDENT(expr_name);
@@ -313,7 +313,7 @@ int ObReqExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64
   return ret;
 }
 
-int ObReqColumnExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqColumnExpr::translate_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   if (!table_name.empty()) {
@@ -331,7 +331,7 @@ int ObReqColumnExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_,
   return ret;
 }
 
-int ObReqConstExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqConstExpr::translate_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   if (is_numeric_) {
@@ -348,7 +348,7 @@ int ObReqConstExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, 
   return ret;
 }
 
-int ObReqMatchExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqMatchExpr::translate_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   DATA_PRINTF("match(");
@@ -387,7 +387,7 @@ int ObReqMatchExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, 
   return ret;
 }
 
-int ObReqWindowFunExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqWindowFunExpr::translate_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   PRINT_IDENT(expr_name);
@@ -425,7 +425,7 @@ int ObReqWindowFunExpr::construct_window_fun_expr(ObIAllocator &alloc, OrderInfo
   return ret;
 }
 
-int OrderInfo::translate(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope)
+int OrderInfo::translate(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope)
 {
   int ret = OB_SUCCESS;
   if (order_item->alias_name.empty()) {
@@ -499,7 +499,7 @@ int ObReqOpExpr::get_op_string(ObString &op_str)
   return ret;
 }
 
-int ObReqOpExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqOpExpr::translate_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   ObString symbol;
@@ -549,7 +549,7 @@ int ObReqOpExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int
   return ret;
 }
 
-int ObReqOpExpr::translate_in_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqOpExpr::translate_in_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   if (need_parentheses_) {
@@ -581,7 +581,7 @@ int ObReqOpExpr::translate_in_expr(ObObjPrintParams &print_params_, char *buf_, 
   return ret;
 }
 
-int ObReqCaseWhenExpr::translate_expr(ObObjPrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
+int ObReqCaseWhenExpr::translate_expr(ObValuePrintParams &print_params_, char *buf_, int64_t buf_len_, int64_t *pos_, ObReqScope scope/*= FIELD_LIST_SCOPE*/, bool need_alias /*= true*/)
 {
   int ret = OB_SUCCESS;
   DATA_PRINTF("(case");
@@ -711,7 +711,7 @@ int ObReqColumnExpr::construct_column_expr(ObReqColumnExpr *&expr, ObIAllocator 
   return ret;
 }
 
-int ObReqConstExpr::construct_const_expr(ObReqConstExpr *&expr, ObIAllocator &alloc, const ObString &expr_name, ObObjType var_type)
+int ObReqConstExpr::construct_const_expr(ObReqConstExpr *&expr, ObIAllocator &alloc, const ObString &expr_name, SqlValueType var_type)
 {
   int ret = OB_SUCCESS;
   if (OB_ISNULL(expr = OB_NEWx(ObReqConstExpr, &alloc, var_type, expr_name))) {
@@ -722,7 +722,7 @@ int ObReqConstExpr::construct_const_expr(ObReqConstExpr *&expr, ObIAllocator &al
   return ret;
 }
 
-int ObReqConstExpr::construct_const_numeric_expr(ObReqConstExpr *&expr, ObIAllocator &alloc, double num_value, ObObjType var_type)
+int ObReqConstExpr::construct_const_numeric_expr(ObReqConstExpr *&expr, ObIAllocator &alloc, double num_value, SqlValueType var_type)
 {
   int ret = OB_SUCCESS;
   if (OB_ISNULL(expr = OB_NEWx(ObReqConstExpr, &alloc, var_type, ObString()))) {
@@ -732,7 +732,7 @@ int ObReqConstExpr::construct_const_numeric_expr(ObReqConstExpr *&expr, ObIAlloc
   return ret;
 }
 
-int ObReqConstExpr::set_numeric(ObIAllocator &alloc, double numeric_value, ObObjType var_type)
+int ObReqConstExpr::set_numeric(ObIAllocator &alloc, double numeric_value, SqlValueType var_type)
 {
   int ret = OB_SUCCESS;
   if (!ob_is_numeric_type(var_type)) {

@@ -77,7 +77,7 @@ int ObAllVirtualCtxMemoryInfo::inner_get_next_row(ObNewRow *&row)
 int ObAllVirtualCtxMemoryInfo::add_row(int64_t ctx_id, int64_t hold, int64_t used, int64_t limit)
 {
   int ret = OB_SUCCESS;
-  ObObj *cells = nullptr;
+  DatumValue *cells = nullptr;
   if (OB_ISNULL(cells = cur_row_.cells_)) {
     ret = OB_ERR_UNEXPECTED;
     SERVER_LOG(ERROR, "cur row cell is NULL", K(ret));
@@ -86,25 +86,25 @@ int ObAllVirtualCtxMemoryInfo::add_row(int64_t ctx_id, int64_t hold, int64_t use
       const uint64_t col_id = output_column_ids_.at(i);
       switch (col_id) {
         case CTX_ID: {
-          cells[i].set_int(ctx_id);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, ctx_id) : ret);
           break;
         }
         case CTX_NAME: {
-          cells[i].set_varchar(get_global_ctx_info().get_ctx_name(ctx_id));
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_varchar_view(cells, cur_row_.count_, i, get_global_ctx_info().get_ctx_name(ctx_id)) : ret);
           cells[i].set_collation_type(
               ObCharset::get_default_collation(ObCharset::get_default_charset()));
           break;
         }
         case HOLD: {
-          cells[i].set_int(hold);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, hold) : ret);
           break;
         }
         case USED: {
-          cells[i].set_int(used);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, used) : ret);
           break;
         }
         case LIMIT: {
-          cells[i].set_int(limit);
+          (OB_SUCC(ret) ? ret = DatumValueBuffer::set_int(cells, cur_row_.count_, i, limit) : ret);
           break;
         }
         default: {
