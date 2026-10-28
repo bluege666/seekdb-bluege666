@@ -1,0 +1,11 @@
+ok: tokenize output is stable
+ok: tokenize output is stable (3rd call)
+ok: tokenize output is stable across parsers
+ok: MATCH(content) AGAINST('数据库') -> 2
+ok: MATCH(content) AGAINST('全文索引') -> 1
+ok: MATCH(content) AGAINST('分词器') -> 2
+ok: MATCH on title column
+ok: unmatched word returns no row
+ok: tokenize output is stable after dict cache flush
+ok: MATCH works on a table created after the flush
+regression: PASSED

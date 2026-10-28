@@ -1,0 +1,12 @@
+number: 2098
+html_url: https://github.com/oceanbase/seekdb/pull/2098
+state: open
+title: perf(fts): share IK dictionaries across tokenizer instances
+base: oceanbase:2026-competition
+head: 666G-Creator:agent/fts-shared-dict
+head_sha: 5b37d3e39df8aba216959ddec2abc06249baecbc
+created_at: 2026-10-28T09:54:16Z
+commits: 1
+changed_files: 14
+additions: 613
+deletions: 118
