@@ -384,6 +384,8 @@ END_P SET_VAR DELIMITER
 %type <node> date_unit date_params timestamp_params
 %type <node> drop_table_stmt table_list drop_view_stmt table_or_tables
 %type <node> explain_stmt explainable_stmt format_name kill_stmt create_outline_stmt alter_outline_stmt drop_outline_stmt opt_outline_target
+%type <node> copy_stmt opt_copy_options copy_option_list copy_option copy_source
+%type <node> read_file_arg_list read_file_arg read_file_named_arg opt_as_alias
 %type <node> expr_list expr expr_const conf_const simple_expr simple_expr_list expr_or_default bit_expr bool_pri predicate explain_or_desc pl_expr_stmt
 %type <node> column_ref multi_delete_table
 %type <node> case_expr func_expr in_expr sub_query_flag search_expr
@@ -652,6 +654,7 @@ stmt:
   | dump_memory_stmt  { $$ = $1; check_question_mark($$, result); }
   | get_diagnostics_stmt    { $$ = $1; question_mark_issue($$, result); }
   | pl_expr_stmt            { $$ = $1; question_mark_issue($$, result); }
+  | copy_stmt                { $$ = $1; question_mark_issue($$, result); }
   | method_opt
   {
     if (!result->is_method_opt_parser_) {
@@ -663,6 +666,74 @@ stmt:
     }
   }
   ;
+
+/*****************************************************************************
+*
+*	copy statement grammar
+*
+*****************************************************************************/
+copy_stmt:
+COPY copy_source TO STRING_VALUE opt_copy_options
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_COPY, 3, $2, $4, $5);
+}
+;
+
+copy_source:
+'(' select_stmt ')'
+{
+  $$ = $2;
+}
+| relation_factor
+{
+  $$ = $1;
+}
+;
+
+opt_copy_options:
+/* EMPTY */
+{
+  $$ = NULL;
+}
+| '(' copy_option_list ')'
+{
+  $$ = $2;
+}
+;
+
+copy_option_list:
+copy_option
+{
+  malloc_list_node($$, result->malloc_pool_, T_COPY_OPTIONS, 2, 1, $1);
+}
+| copy_option_list ',' copy_option
+{
+  push_back_list(result->malloc_pool_, result, $$, $1, $3);
+}
+;
+
+copy_option:
+relation_name
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_COPY_OPTION, 2, $1, NULL);
+}
+| relation_name STRING_VALUE
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_COPY_OPTION, 2, $1, $2);
+}
+| relation_name BOOL_VALUE
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_COPY_OPTION, 2, $1, $2);
+}
+| relation_name INTNUM
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_COPY_OPTION, 2, $1, $2);
+}
+| relation_name relation_name
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_COPY_OPTION, 2, $1, $2);
+}
+;
 
 /*****************************************************************************
 *
@@ -11258,6 +11329,76 @@ relation_factor %prec LOWER_PARENS
 {
   malloc_non_terminal_node($$, result->malloc_pool_, T_TABLE_COLLECTION_EXPRESSION, 2, $3, $6);
 }
+/* OB-P:a4L9E_IDIyEM2Ol_ZvDXqw */
+/* file-as-database table function: read_csv / read_json / read_parquet / glob */
+| NAME_OB '(' read_file_arg_list ')' opt_as_alias
+{
+  ParseNode *func_node = NULL;
+  malloc_non_terminal_node(func_node, result->malloc_pool_, T_READ_FILE_FUNCTION, 2, $1, $3);
+  if ($5 == NULL) {
+    malloc_non_terminal_node($$, result->malloc_pool_, T_ORG, 4, func_node, NULL, NULL, NULL);
+  } else {
+    malloc_non_terminal_node($$, result->malloc_pool_, T_ALIAS, 5, func_node, $5, NULL, NULL, NULL);
+  }
+  $$->value_ = T_EXTERNAL_FILE_LOCATION;
+}
+;
+
+read_file_arg_list:
+read_file_arg
+{
+  malloc_list_node($$, result->malloc_pool_, T_READ_FILE_ARGS, 2, 1, $1);
+}
+| read_file_arg_list ',' read_file_named_arg
+{
+  push_back_list(result->malloc_pool_, result, $$, $1, $3);
+}
+;
+
+/* only the first argument may be positional, the rest must be named */
+read_file_arg:
+STRING_VALUE
+{
+  $$ = $1;
+}
+| read_file_named_arg
+{
+  $$ = $1;
+}
+;
+
+read_file_named_arg:
+relation_name COMP_EQ expr
+{
+  malloc_non_terminal_node($$, result->malloc_pool_, T_READ_FILE_NAMED_ARG, 2, $1, $3);
+}
+| NULLX COMP_EQ expr
+{
+  (void)($1) ; /* make bison mute */
+  ParseNode *name_node = NULL;
+  malloc_terminal_node(name_node, result->malloc_pool_, T_IDENT);
+  name_node->str_value_ = "null";
+  name_node->str_len_ = 4;
+  malloc_non_terminal_node($$, result->malloc_pool_, T_READ_FILE_NAMED_ARG, 2, name_node, $3);
+}
+;
+
+opt_as_alias:
+/* EMPTY */
+{
+  $$ = NULL;
+}
+|
+AS relation_name
+{
+  $$ = $2;
+}
+| NAME_OB
+{
+  /* DuckDB style alias without AS; plain identifiers only, so that
+   * unreserved keywords such as EXCEPT/UNION stay with the set operation. */
+  $$ = $1;
+}
 ;
 
 dml_table_name:
@@ -12265,7 +12406,10 @@ explain_or_desc relation_factor opt_desc_column_option
   malloc_non_terminal_node($$, result->malloc_pool_, T_SHOW_COLUMNS, 4, $$, $2, NULL, $3);
 }
 
-| explain_or_desc explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, 0, $2, NULL, NULL);}
+| explain_or_desc explainable_stmt
+{
+  GEN_EXPLAN_STMT($1, $$, 0, 0, $2, NULL, NULL);
+}
 | explain_or_desc PRETTY explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, T_PRETTY, $3, NULL, NULL);}
 | explain_or_desc PRETTY_COLOR explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, T_PRETTY_COLOR, $3, NULL, NULL);}
 
@@ -12305,9 +12449,21 @@ explain_or_desc relation_factor opt_desc_column_option
 ;
 
 explain_or_desc:
-EXPLAIN {$$ = NULL;}
-| DESCRIBE {$$ = NULL;}
-| DESC  {$$ = NULL;}
+EXPLAIN
+{
+  malloc_terminal_node($$, result->malloc_pool_, T_INT);
+  $$->value_ = 0;
+}
+| DESCRIBE
+{
+  malloc_terminal_node($$, result->malloc_pool_, T_INT);
+  $$->value_ = 1;
+}
+| DESC
+{
+  malloc_terminal_node($$, result->malloc_pool_, T_INT);
+  $$->value_ = 1;
+}
 ;
 
 explainable_stmt:
