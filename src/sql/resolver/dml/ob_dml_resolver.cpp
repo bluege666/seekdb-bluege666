@@ -2701,6 +2701,24 @@ int ObDMLResolver::resolve_table(const ParseNode &parse_tree,
         OZ (resolve_function_table_item(*table_node, table_item));
         break;
       }
+      case T_READ_FILE_FUNCTION: {
+        // file-as-database table function: read_csv / read_json / read_parquet / glob
+        bool enable_file_sql = false;
+        if (OB_ISNULL(session_info_)) {
+          ret = OB_INVALID_ARGUMENT;
+        } else if (OB_FAIL(session_info_->get_sys_variable(SYS_VAR_ENABLE_FILE_SQL,
+                                                          enable_file_sql))) {
+          LOG_WARN("failed to get enable_file_sql", K(ret));
+        } else if (OB_UNLIKELY(!enable_file_sql)) {
+          ret = OB_NOT_SUPPORTED;
+          LOG_USER_ERROR(OB_NOT_SUPPORTED, "file-as-database table function when enable_file_sql is off");
+        } else {
+          // the scan operator for local files is not implemented yet
+          ret = OB_NOT_SUPPORTED;
+          LOG_USER_ERROR(OB_NOT_SUPPORTED, "file-as-database table function");
+        }
+        break;
+      }
       case T_JSON_TABLE_EXPRESSION: {
         OZ (resolve_json_table_item(*table_node, table_item));
         break;

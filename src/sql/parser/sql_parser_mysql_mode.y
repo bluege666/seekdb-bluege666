@@ -385,7 +385,7 @@ END_P SET_VAR DELIMITER
 %type <node> drop_table_stmt table_list drop_view_stmt table_or_tables
 %type <node> explain_stmt explainable_stmt format_name kill_stmt create_outline_stmt alter_outline_stmt drop_outline_stmt opt_outline_target
 %type <node> copy_stmt opt_copy_options copy_option_list copy_option copy_source
-%type <node> read_file_arg_list read_file_arg opt_as_alias
+%type <node> read_file_arg_list read_file_arg read_file_named_arg opt_as_alias
 %type <node> expr_list expr expr_const conf_const simple_expr simple_expr_list expr_or_default bit_expr bool_pri predicate explain_or_desc pl_expr_stmt
 %type <node> column_ref multi_delete_table
 %type <node> case_expr func_expr in_expr sub_query_flag search_expr
@@ -11347,22 +11347,30 @@ read_file_arg
 {
   malloc_list_node($$, result->malloc_pool_, T_READ_FILE_ARGS, 2, 1, $1);
 }
-| read_file_arg_list ',' read_file_arg
+| read_file_arg_list ',' read_file_named_arg
 {
   push_back_list(result->malloc_pool_, result, $$, $1, $3);
 }
 ;
 
+/* only the first argument may be positional, the rest must be named */
 read_file_arg:
 STRING_VALUE
 {
   $$ = $1;
 }
-| relation_name SET_VAR expr
+| read_file_named_arg
+{
+  $$ = $1;
+}
+;
+
+read_file_named_arg:
+relation_name COMP_EQ expr
 {
   malloc_non_terminal_node($$, result->malloc_pool_, T_READ_FILE_NAMED_ARG, 2, $1, $3);
 }
-| NULLX SET_VAR expr
+| NULLX COMP_EQ expr
 {
   (void)($1) ; /* make bison mute */
   ParseNode *name_node = NULL;
@@ -11382,6 +11390,12 @@ opt_as_alias:
 AS relation_name
 {
   $$ = $2;
+}
+| NAME_OB
+{
+  /* DuckDB style alias without AS; plain identifiers only, so that
+   * unreserved keywords such as EXCEPT/UNION stay with the set operation. */
+  $$ = $1;
 }
 ;
 
@@ -12393,9 +12407,6 @@ explain_or_desc relation_factor opt_desc_column_option
 | explain_or_desc explainable_stmt
 {
   GEN_EXPLAN_STMT($1, $$, 0, 0, $2, NULL, NULL);
-  if (NULL != $1 && 1 == $1->value_ && NULL != $2 && T_SELECT == $2->type_) {
-    $$->value_ = 1; /* DESCRIBE SELECT: resolve to column metadata */
-  }
 }
 | explain_or_desc PRETTY explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, T_PRETTY, $3, NULL, NULL);}
 | explain_or_desc PRETTY_COLOR explainable_stmt { GEN_EXPLAN_STMT($1, $$, 0, T_PRETTY_COLOR, $3, NULL, NULL);}
